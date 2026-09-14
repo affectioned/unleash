@@ -44,6 +44,7 @@ func main() {
 		cmd.NewInstallRulesCmd(),
 		cmd.NewInstallSkillsCmd(),
 		cmd.NewUninstallRulesCmd(),
+		cmd.NewUninstallCCCmd(),
 		cmd.NewScanCmd(),
 		cmd.NewDoctorCmd(),
 		cmd.NewWatchCmd(),
