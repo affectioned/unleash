@@ -125,8 +125,17 @@
     return _stderrWrite(chunk, enc, cb);
   };
 
-  // 6. Breadcrumb for `vpcc doctor`.
-  try { process.env.VPCC_PRELOAD_LOADED = "1"; } catch (_) {}
+  // 6. Breadcrumb env vars.
+  try {
+    process.env.VPCC_PRELOAD_LOADED = "1";
+    process.env.UNLEASH_ACTIVE = "1";
+  } catch (_) {}
+
+  // 6b. Startup banner — one dim line to stderr so the operator knows at a glance.
+  try {
+    const dim = "\x1b[90m", rst = "\x1b[0m";
+    _stderrWrite(`${dim}[unleash] active${rst}\n`);
+  } catch (_) {}
 
   // 7. Windows POSIX-path normalization for plugin hook resolution.
   //
