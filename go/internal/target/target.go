@@ -474,7 +474,9 @@ func npmGlobalRoots() []string {
 		candidates = []string{"npm.cmd", "npm.exe", "npm"}
 	}
 	for _, npm := range candidates {
-		out, err := exec.Command(npm, "root", "-g").Output()
+		cmd := exec.Command(npm, "root", "-g")
+		hideConsole(cmd)
+		out, err := cmd.Output()
 		if err == nil {
 			s := strings.TrimSpace(string(out))
 			if s != "" {
@@ -501,7 +503,9 @@ func versionGlob(base, suffix string) []string {
 }
 
 func pnpmGlobalRoot() string {
-	out, err := exec.Command("pnpm", "root", "-g").Output()
+	cmd := exec.Command("pnpm", "root", "-g")
+	hideConsole(cmd)
+	out, err := cmd.Output()
 	if err == nil {
 		s := strings.TrimSpace(string(out))
 		if s != "" {

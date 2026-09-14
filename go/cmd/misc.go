@@ -292,8 +292,9 @@ func runInstallGuard() int {
 	case "windows":
 		taskName := "unleash-guard"
 		exec.Command("schtasks", "/Delete", "/TN", taskName, "/F").Run()
+		tr := fmt.Sprintf(`powershell.exe -NoProfile -WindowStyle Hidden -Command "& \"%s\" guard"`, unleashBin)
 		createCmd := exec.Command("schtasks", "/Create", "/TN", taskName,
-			"/TR", fmt.Sprintf(`"%s" guard`, unleashBin),
+			"/TR", tr,
 			"/SC", "HOURLY", "/MO", "6",
 			"/RL", "LIMITED", "/F")
 		out, err := createCmd.CombinedOutput()
@@ -387,6 +388,7 @@ WantedBy=timers.target
 	}
 
 	fmt.Printf("  unleash guard runs automatically — Claude Code updates are patched within minutes\n")
+	fmt.Printf("  to remove: unleash uninstall-guard\n")
 	return 0
 }
 

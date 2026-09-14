@@ -56,9 +56,10 @@ func runSetup() error {
 	fmt.Printf("\n  %s[3/5] installing plugins...%s\n", console.B, console.X)
 	pluginsInstalled, pluginsSkipped := installPlugins()
 
-	// ── Step 4: Install guard ─────────────────────────────────────────────
-	fmt.Printf("\n  %s[4/5] installing auto-patch guard...%s\n", console.B, console.X)
-	guardOK := installGuardQuiet()
+	// ── Step 4: Guard (opt-in) ────────────────────────────────────────────
+	fmt.Printf("\n  %s[4/5] auto-patch guard (opt-in)%s\n", console.B, console.X)
+	fmt.Printf("  %s skipped — install explicitly with: unleash install-guard%s\n", console.WARN, console.X)
+	guardOK := true
 
 	// ── Step 5: Verify ───────────────────────────────────────────────────
 	fmt.Printf("\n  %s[5/5] verifying installation...%s\n", console.B, console.X)
@@ -76,9 +77,9 @@ func runSetup() error {
 	} else {
 		printSetupStatus("plugins skipped (install manually from Claude Code)", false)
 	}
-	printSetupStatus("auto-patch guard installed", guardOK)
+	printSetupStatus("auto-patch guard (run 'unleash install-guard' to enable)", guardOK)
 
-	if !patchOK || !rulesOK || !guardOK || !depsOK {
+	if !patchOK || !rulesOK || !depsOK {
 		return fmt.Errorf("setup incomplete")
 	}
 	fmt.Printf("\n%s%s unleash setup complete%s\n", console.G, console.CHECK, console.X)
@@ -395,8 +396,9 @@ func installGuardQuiet() bool {
 	switch runtime.GOOS {
 	case "windows":
 		_ = exec.Command("schtasks", "/Delete", "/TN", "unleash-guard", "/F").Run()
+		tr := fmt.Sprintf(`powershell.exe -NoProfile -WindowStyle Hidden -Command "& \"%s\" guard"`, vpccBin)
 		cmd := exec.Command("schtasks", "/Create", "/TN", "unleash-guard",
-			"/TR", fmt.Sprintf(`"%s" guard`, vpccBin),
+			"/TR", tr,
 			"/SC", "HOURLY", "/MO", "6", "/RL", "LIMITED", "/F")
 		if err := cmd.Run(); err != nil {
 			fmt.Printf("  %s Windows Task Scheduler failed: %v%s\n", console.WARN, err, console.X)
