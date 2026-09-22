@@ -245,7 +245,19 @@ func applyJSPatchesToRegion(data []byte, effLo, effHi int, patchList []patches.P
 
 		for _, sub := range p.Patches {
 			if sub.AppliedMarker != "" && bytes.Contains(region, []byte(sub.AppliedMarker)) {
-				continue
+				// Marker found — but with expanded Layout B regions the
+				// marker may come from a raw-JS copy while bytecode copies
+				// remain unpatched. Only skip when no unpatched copies of
+				// the search string remain.
+				skip := true
+				if sub.Search != "" && bytes.Contains(region, []byte(sub.Search)) {
+					skip = false
+				} else if sub.SearchRegex != "" {
+					skip = false // regex — let the apply function decide
+				}
+				if skip {
+					continue
+				}
 			}
 			if sub.SearchRegex != "" {
 				applied, skipped, padding := applyRegexSubPatch(region, sub)

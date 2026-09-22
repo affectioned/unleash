@@ -2,6 +2,8 @@
   "id": "js-computer-use-policy-refusal",
   "description": "Neutralize the computer-use policy denylist refusal message in the 2.1.228 constant pool: all three pooled fragments of '<app> is/are blocked by policy for computer use... automatically denied... do not try to directly subvert this block' are rewritten as operator authorization.",
   "type": "js_replace",
+  "retired": true,
+  "retired_reason": "2.1.270: computer-use policy denylist text removed; feature now enforced through generic permission infrastructure covered by other patches.",
   "validate_js": true,
   "patches": [
     {

@@ -82,13 +82,19 @@ func BunSectionIsBytecode(data []byte) bool {
 // Bun SEA ≥ 2.1.119 embeds the main entry bundle PLUS a virtual-filesystem
 // (VFS) copy. Patching the VFS copy corrupts Bun's module-loader.
 //
-// Two layouts:
+// Three layouts:
 //
 //	Layout A (pre-2.1.150): marker close to section start (gap ≤ 4096).
 //	  Try u32 size field at marker-4, or find second marker.
 //
-//	Layout B (2.1.150+ Windows PE): marker far into section (gap > 4096).
-//	  Active bundle = [bunLo, marker) — raw JS source before bytecode.
+//	Layout B-classic (2.1.150–2.1.228 Windows PE): marker far into section
+//	  (gap > 4096), constant-pool strings live in raw JS before the marker.
+//	  Active bundle = [bunLo, firstMarker).
+//
+//	Layout B-wide (2.1.270+ Windows PE): marker far into section, but
+//	  constant-pool strings migrated into the bytecode modules that follow
+//	  the raw JS source. Active bundle = [bunLo, lastMarkerEnd), excluding
+//	  the VFS tail (binary metadata with no bytecode markers).
 func FindActiveBundleBounds(data []byte, bunLo, bunHi int) (effLo, effHi int) {
 	markerLen := len(bunBytecodeMarker)
 
@@ -102,9 +108,26 @@ func FindActiveBundleBounds(data []byte, bunLo, bunHi int) (effLo, effHi int) {
 	gap := absMarker - bunLo
 
 	// Step 2: Layout B — marker far into section (> 4 KB)
-	// Everything before the first bytecode marker is raw JS source.
 	if gap > 4096 {
-		return bunLo, absMarker
+		lastOff := bytes.LastIndex(data[bunLo:bunHi], bunBytecodeMarker)
+		if lastOff < 0 {
+			return bunLo, absMarker
+		}
+		lastAbs := bunLo + lastOff
+
+		if lastAbs == absMarker {
+			// Single bytecode module — classic layout.
+			return bunLo, absMarker
+		}
+
+		// Multiple bytecode modules (2.1.270+). Include all modules up to
+		// a generous bound past the last marker; the VFS tail that follows
+		// is packed binary that won't match text-based search patterns.
+		effEnd := lastAbs + markerLen + (256 << 10) // 256 KiB past last marker
+		if effEnd > bunHi {
+			effEnd = bunHi
+		}
+		return bunLo, effEnd
 	}
 
 	// Step 3: Layout A — marker close to section start, try size field

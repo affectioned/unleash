@@ -295,8 +295,16 @@ func patchJSTarget(tgt, kind string, jsPatches []patches.Patch, dryRun bool) (ok
 			hasCandidate := false
 			for _, sub := range p.Patches {
 				if sub.AppliedMarker != "" && bytesContains(eff, []byte(sub.AppliedMarker)) {
-					markerSeen = true
-					continue
+					skipThis := true
+					if sub.Search != "" && bytesContains(eff, []byte(sub.Search)) {
+						skipThis = false
+					} else if sub.SearchRegex != "" && regexCountMatchesN(sub.SearchRegex, eff, 1) > 0 {
+						skipThis = false
+					}
+					if skipThis {
+						markerSeen = true
+						continue
+					}
 				}
 				sr := sub.SearchRegex
 				if sr == "" {
