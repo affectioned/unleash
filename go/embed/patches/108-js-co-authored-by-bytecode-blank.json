@@ -11,21 +11,22 @@
       "applied_marker": null,
       "description": "Blank Co-Authored-By prefix constant",
       "required": false,
-      "count": 1
+      "count": 0
     },
     {
-      "search": " <noreply@anthropic.com>\n",
+      "search": " <noreply@anthropic.com>",
       "replace": "                        ",
       "applied_marker": null,
-      "description": "Blank noreply@anthropic.com suffix constant",
+      "description": "Blank noreply@anthropic.com suffix constant (template literal, no trailing newline since 2.1.250+)",
       "required": false,
-      "count": 1
+      "count": 0
     }
   ],
   "anchor_strings": [
-    "Co-Authored-By: ",
-    "noreply@anthropic.com"
+    "attribution_texts",
+    "includeCoAuthoredBy"
   ],
   "version_first_seen": "2.1.195",
+  "version_last_tested": "2.1.270",
   "category": "attribution"
 }

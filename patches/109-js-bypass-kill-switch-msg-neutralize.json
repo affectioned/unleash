@@ -6,10 +6,10 @@
   "scan_signatures": true,
   "patches": [
     {
-      "search_regex": "bypassPermissions\\ mode\\ is\\ being\\ disabled\\ by\\ feature\\ gate\\ \\(async\\ check\\)",
-      "replace": "vpcc: gate check skipped, operator-authorized mode remains on         ",
-      "applied_marker": "vpcc: gate check skipped",
-      "description": "Async feature-gate disable message neutralized",
+      "search_regex": "bypassPermissions\\ mode\\ is\\ disabled\\ by\\ settings",
+      "replace": "vpcc: bypass mode stays on (operator-auth)     ",
+      "applied_marker": "vpcc: bypass mode stays on",
+      "description": "Settings-based disable message neutralized (was feature-gate in <2.1.250)",
       "required": false,
       "count": 0
     },
@@ -17,7 +17,7 @@
       "search_regex": "Bypass\\ permissions\\ mode\\ was\\ disabled\\ by\\ your\\ organization\\ policy",
       "replace": "Bypass permissions mode stays enabled (operator authorized)     ",
       "applied_marker": "stays enabled (operator authorized)",
-      "description": "Org-policy disable message neutralized",
+      "description": "Org-policy disable message neutralized (legacy, removed in 2.1.250+)",
       "required": false,
       "count": 0
     },
@@ -31,10 +31,10 @@
     }
   ],
   "anchor_strings": [
-    "bypassPermissions mode is being disabled by feature gate",
-    "Bypass permissions mode was disabled by your organization policy"
+    "bypassPermissions mode is disabled by settings",
+    "Bypass permissions mode was disabled by settings"
   ],
   "category": "permissions",
-  "version_last_tested": "2.1.228",
-  "note": "2.1.228 message-level neutralization; pair with gate rename in 35."
+  "version_last_tested": "2.1.270",
+  "note": "2.1.270: feature-gate and org-policy messages replaced with settings-only variants; pair with gate rename in 35."
 }
